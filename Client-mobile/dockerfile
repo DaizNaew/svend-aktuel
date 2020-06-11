@@ -1,0 +1,32 @@
+FROM nginx:latest
+
+# update 
+RUN apt update
+# install curl 
+RUN apt install curl -y
+# get install script and pass it to execute: 
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
+# and install node 
+RUN apt install nodejs -y
+# confirm that it was successful 
+RUN node -v
+# npm installs automatically 
+RUN npm -v
+
+COPY package*.json ./
+
+RUN npm i
+
+COPY . .
+
+RUN npm run build-prod
+
+# ADD /www /var/www/nginx-default/
+
+RUN mkdir /var/www
+
+RUN mkdir /var/www/nginx-default
+
+RUN cp -r /www/. /var/www/nginx-default/
+
+EXPOSE 80 80

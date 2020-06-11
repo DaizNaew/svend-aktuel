@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+  client:
+    ports:
+      - "80:80"
+    build:
+      context: ./Client-mobile
+    networks:
+      websocket-work:
+        aliases:
+          - client
+    volumes:
+      - ./Client-mobile/www:/code
+      - ./site.conf:/etc/nginx/conf.d/default.conf
+  socket:
+    ports:
+      - "3001:3001"
+    build: ./Server
+    networks:
+      websocket-work:
+        aliases:
+          - soc
+    volumes:
+      - ./Server:/code/websocket/
+  api:
+    ports:
+      - "3000:3000"
+    build: ./Api
+    networks:
+      websocket-work:
+        aliases:
+          - api
+  db:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      websocket-work:
+        aliases:
+          - db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: svendchk
+      MYSQL_USER: svend
+      MYSQL_PASSWORD: svendsen
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./DB/scheme:/docker-entrypoint-initdb.d
+      - ./DB/docker-data/data/db:/var/lib/mysql
+    
+networks:
+  websocket-work:
+    driver: bridge
